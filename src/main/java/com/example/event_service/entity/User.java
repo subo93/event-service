@@ -24,8 +24,14 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @Column(nullable = false)
+    private String password;
+
+
     private Instant createdAt;
     private Instant updatedAt;
+
+
 
     public enum Role {
         USER, ADMIN
