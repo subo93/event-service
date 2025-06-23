@@ -25,7 +25,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getPassword() {
-        // Assume you have password field, else return null or throw UnsupportedOperationException
+        // password field, else return null or throw UnsupportedOperationException
         return user.getPassword();
     }
 
