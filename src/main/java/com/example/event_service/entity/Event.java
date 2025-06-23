@@ -32,6 +32,9 @@ public class Event {
     private Instant createdAt;
     private Instant updatedAt;
 
+    public void setArchived(boolean b) {
+    }
+
     public enum Visibility {
         PUBLIC, PRIVATE
     }
