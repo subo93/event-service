@@ -1,6 +1,5 @@
-package com.example.event_service.entity;
+package com.example.event_service.dto;
 
-import jakarta.persistence.*;
 import lombok.*;
 import java.time.Instant;
 import java.util.UUID;
@@ -10,29 +9,15 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Entity
-@Table(name = "events")
-public class Event {
-    @Id
+public class EventDTO {
     private UUID id;
-
     private String title;
     private String description;
-
-    @Column(nullable = false)
     private UUID hostId;
-
     private Instant startTime;
     private Instant endTime;
     private String location;
-
-    @Enumerated(EnumType.STRING)
-    private Visibility visibility;
-
+    private String visibility;
     private Instant createdAt;
     private Instant updatedAt;
-
-    public enum Visibility {
-        PUBLIC, PRIVATE
-    }
 }
