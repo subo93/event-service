@@ -1,5 +1,6 @@
 package com.example.event_service.entity;
 
+import com.example.event_service.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.Instant;
@@ -13,6 +14,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "users")
 public class User {
+    public static UserRole Role;
     @Id
     private UUID id;
 
@@ -22,18 +24,11 @@ public class User {
     private String email;
 
     @Enumerated(EnumType.STRING)
-    private Role role;
+    private UserRole role;
 
     @Column(nullable = false)
     private String password;
 
-
     private Instant createdAt;
     private Instant updatedAt;
-
-
-
-    public enum Role {
-        USER, ADMIN
-    }
 }
