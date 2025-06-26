@@ -1,10 +1,10 @@
 package com.example.event_service.service.impl;
 
+import com.example.event_service.enums.UserRole;
 import com.example.event_service.dto.EventDTO;
 import com.example.event_service.entity.Event;
 import com.example.event_service.entity.User;
 import com.example.event_service.exception.ResourceNotFoundException;
-import com.example.event_service.mapper.EventMapper;
 import com.example.event_service.repository.EventRepository;
 import com.example.event_service.repository.UserRepository;
 import com.example.event_service.service.EventService;
@@ -27,18 +27,15 @@ public class EventServiceImpl implements EventService {
 
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
-    private final EventMapper eventMapper;
 
     @Override
     public EventDTO createEvent(EventDTO eventDTO, String currentUserEmail) {
         User user = userRepository.findByEmail(currentUserEmail)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        if (user.getRole() != User.Role.ADMIN) {
+        if (user.getRole() != UserRole.ADMIN) {
             throw new AccessDeniedException("Only admins can create events");
         }
-
-        //Event event = eventMapper.toEntity(eventDTO);
 
         Event event = new Event();
         event.setId(UUID.randomUUID());
@@ -52,15 +49,8 @@ public class EventServiceImpl implements EventService {
         event.setCreatedAt(Instant.now());
         event.setUpdatedAt(Instant.now());
 
-
-        event.setId(UUID.randomUUID());
-        event.setHostId(user.getId());
-        event.setCreatedAt(Instant.now());
-        event.setUpdatedAt(Instant.now());
-
         Event saved = eventRepository.save(event);
 
-        // Manual mapping entity -> DTO to avoid MapStruct issues
         EventDTO responseDto = EventDTO.builder()
                 .id(saved.getId())
                 .title(saved.getTitle())
@@ -85,7 +75,7 @@ public class EventServiceImpl implements EventService {
         User user = userRepository.findByEmail(currentUserEmail)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        boolean isAdmin = user.getRole() == User.Role.ADMIN;
+        boolean isAdmin = user.getRole() == UserRole.ADMIN;
         boolean isHost = event.getHostId().equals(user.getId());
 
         if (!isAdmin && !isHost) {
@@ -110,7 +100,18 @@ public class EventServiceImpl implements EventService {
         event.setUpdatedAt(Instant.now());
 
         Event updated = eventRepository.save(event);
-        return eventMapper.toDto(updated);
+        return EventDTO.builder()
+                .id(updated.getId())
+                .title(updated.getTitle())
+                .description(updated.getDescription())
+                .hostId(updated.getHostId())
+                .startTime(updated.getStartTime())
+                .endTime(updated.getEndTime())
+                .location(updated.getLocation())
+                .visibility(updated.getVisibility() != null ? updated.getVisibility().name() : null)
+                .createdAt(updated.getCreatedAt())
+                .updatedAt(updated.getUpdatedAt())
+                .build();
     }
 
     @Override
@@ -121,7 +122,7 @@ public class EventServiceImpl implements EventService {
         User user = userRepository.findByEmail(currentUserEmail)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        boolean isAdmin = user.getRole() == User.Role.ADMIN;
+        boolean isAdmin = user.getRole() == UserRole.ADMIN;
         boolean isHost = event.getHostId().equals(user.getId());
 
         if (!isAdmin && !isHost) {
@@ -135,12 +136,23 @@ public class EventServiceImpl implements EventService {
     public EventDTO getEventById(UUID eventId) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found"));
-        return eventMapper.toDto(event);
+        return EventDTO.builder()
+                .id(event.getId())
+                .title(event.getTitle())
+                .description(event.getDescription())
+                .hostId(event.getHostId())
+                .startTime(event.getStartTime())
+                .endTime(event.getEndTime())
+                .location(event.getLocation())
+                .visibility(event.getVisibility() != null ? event.getVisibility().name() : null)
+                .createdAt(event.getCreatedAt())
+                .updatedAt(event.getUpdatedAt())
+                .build();
     }
 
     @Override
     public Page<EventDTO> listEvents(String location, String visibility, String dateFrom, String dateTo, Pageable pageable) {
-        Specification<Event> spec = Specification.where(null);
+        Specification<Event> spec = (root, query, cb) -> cb.conjunction();
 
         if (location != null && !location.isEmpty()) {
             spec = spec.and((root, query, cb) -> cb.equal(root.get("location"), location));
@@ -166,7 +178,18 @@ public class EventServiceImpl implements EventService {
         }
 
         Page<Event> events = eventRepository.findAll(spec, pageable);
-        return events.map(eventMapper::toDto);
+        return events.map(event -> EventDTO.builder()
+                .id(event.getId())
+                .title(event.getTitle())
+                .description(event.getDescription())
+                .hostId(event.getHostId())
+                .startTime(event.getStartTime())
+                .endTime(event.getEndTime())
+                .location(event.getLocation())
+                .visibility(event.getVisibility() != null ? event.getVisibility().name() : null)
+                .createdAt(event.getCreatedAt())
+                .updatedAt(event.getUpdatedAt())
+                .build());
     }
 
     @Override
@@ -174,6 +197,17 @@ public class EventServiceImpl implements EventService {
         Instant now = Instant.now();
         Specification<Event> spec = (root, query, cb) -> cb.greaterThan(root.get("startTime"), now);
         Page<Event> events = eventRepository.findAll(spec, pageable);
-        return events.map(eventMapper::toDto);
+        return events.map(event -> EventDTO.builder()
+                .id(event.getId())
+                .title(event.getTitle())
+                .description(event.getDescription())
+                .hostId(event.getHostId())
+                .startTime(event.getStartTime())
+                .endTime(event.getEndTime())
+                .location(event.getLocation())
+                .visibility(event.getVisibility() != null ? event.getVisibility().name() : null)
+                .createdAt(event.getCreatedAt())
+                .updatedAt(event.getUpdatedAt())
+                .build());
     }
 }

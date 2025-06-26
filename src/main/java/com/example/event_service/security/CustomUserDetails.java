@@ -18,7 +18,6 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // Use the inner enum Role from User
         return List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
     }
 
